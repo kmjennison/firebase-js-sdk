@@ -178,6 +178,7 @@ fireauth.storage.IndexedDB.getFireauthManager = function() {
 fireauth.storage.IndexedDB.prototype.initializeDb_ = function() {
   var self = this;
   return new goog.Promise(function(resolve, reject) {
+    console.log('Using modified Firebase to initialize IndexedDB')
     var request = self.indexedDB_.open(self.dbName_, self.version_);
     request.onerror = function(event) {
       reject(new Error(event.target.errorCode));
