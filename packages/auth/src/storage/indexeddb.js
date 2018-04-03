@@ -182,7 +182,8 @@ fireauth.storage.IndexedDB.prototype.initializeDb_ = function() {
     var request = self.indexedDB_.open(self.dbName_, self.version_);
     request.onerror = function(event) {
       console.log('Firebase: IDB onerror event:', event)
-      reject(new Error(event.target.errorCode));
+      // https://developer.mozilla.org/en-US/docs/Web/API/IDBRequest/error
+      reject(new Error(event.target.error))
     };
     request.onupgradeneeded = function(event) {
       var db = event.target.result;
