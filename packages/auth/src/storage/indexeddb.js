@@ -167,7 +167,24 @@ fireauth.storage.IndexedDB.getFireauthManager = function() {
   return fireauth.storage.IndexedDB.managerInstance_;
 };
 
-
+/**
+ * Delete the indexedDB database
+ * @return {!goog.Promise<!IDBDatabase>} A promise that resolves on
+ *     successful database deletion.
+ * @private
+ */
+fireauth.storage.IndexedDB.prototype.deleteDb_ = function() {
+  var self = this;
+  return new goog.Promise(function(resolve, reject) {
+    var request = self.indexedDB_.deleteDatabase(self.dbName_);
+    request.onsuccess = function(event) {
+      resolve();
+    }
+    request.onerror = function(event) {
+      reject(new Error(event.target.errorCode));
+    }
+  })
+}
 
 /**
  * Initializes The indexedDB database, creates it if not already created and
@@ -199,7 +216,16 @@ fireauth.storage.IndexedDB.prototype.initializeDb_ = function() {
     };
     request.onsuccess = function(event) {
       var db = event.target.result;
-      resolve(db);
+      // TODO: fix tests and add test
+      // If the DB is missing the object store, recreate it.
+      if (!db.objectStoreNames.contains(self.objectStoreName_)) {
+        return self.deleteDb_()
+          .then(function() {
+            return self.initializeDb_()
+          })
+      } else {
+        resolve(db);
+      }      
     };
   });
 };
